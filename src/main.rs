@@ -2,6 +2,7 @@
  * This file contains template code.
  * There is no need to edit this file unless you want to change template functionality.
  */
+#![allow(clippy::all, clippy::pedantic)]
 use aoc::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
 use std::process::Command;
 
