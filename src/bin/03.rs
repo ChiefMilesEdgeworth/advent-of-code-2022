@@ -1,81 +1,46 @@
 use itertools::Itertools;
-use std::cmp::Ordering::*;
 
 type Rucksack<'a> = (&'a str, &'a str);
 type Group<'a> = (&'a str, &'a str, &'a str);
 
 fn rucksacks(input: &str) -> impl Iterator<Item = Rucksack> {
-    input
-        .split_ascii_whitespace()
-        .map(|line| line.split_at(line.len() / 2))
+    input.lines().map(|line| line.split_at(line.len() / 2))
 }
 
 fn groups(input: &str) -> impl Iterator<Item = Group> {
     input.split_ascii_whitespace().tuples()
 }
 
-fn find_extra_item((left, right): Rucksack) -> char {
-    let (mut left, mut right) = (
-        left.chars().sorted_unstable(),
-        right.chars().sorted_unstable(),
-    );
-    let (mut a, mut b) = (left.next().unwrap(), right.next().unwrap());
-    loop {
-        match a.cmp(&b) {
-            std::cmp::Ordering::Less => a = left.next().unwrap(),
-            std::cmp::Ordering::Greater => b = right.next().unwrap(),
-            std::cmp::Ordering::Equal => return a,
-        }
-    }
+fn bits(line: &str) -> u64 {
+    line.bytes()
+        .map(priority)
+        .fold(0, |bits, bit| bits | 1 << bit)
 }
 
-fn find_badge((a, b, c): Group) -> char {
-    let (mut first, mut second, mut third) = (
-        a.chars().sorted_unstable(),
-        b.chars().sorted_unstable(),
-        c.chars().sorted_unstable(),
-    );
-    let (mut a, mut b, mut c) = (
-        first.next().unwrap(),
-        second.next().unwrap(),
-        third.next().unwrap(),
-    );
-    loop {
-        match (a.cmp(&b), b.cmp(&c)) {
-            (Less, _) => a = first.next().unwrap(),
-            (Greater, _) | (Equal, Less) => b = second.next().unwrap(),
-            (Equal, Greater) => c = third.next().unwrap(),
-            (Equal, Equal) => return a,
-        }
-    }
+fn find_extra_item((left, right): Rucksack) -> u32 {
+    let common = bits(left) & bits(right);
+    u64::BITS - common.leading_zeros()
 }
 
-fn priority(c: char) -> u8 {
+fn find_badge((a, b, c): Group) -> u32 {
+    let common = bits(a) & bits(b) & bits(c);
+    u64::BITS - common.leading_zeros()
+}
+
+fn priority(c: u8) -> u8 {
     match c {
-        'a'..='z' => c as u8 - b'a' + 1,
-        'A'..='Z' => c as u8 - b'A' + 27,
+        b'a'..=b'z' => c - b'a',
+        b'A'..=b'Z' => c - b'A' + 26,
         _ => unreachable!(),
     }
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    Some(
-        rucksacks(input)
-            .map(find_extra_item)
-            .map(priority)
-            .map_into::<u32>()
-            .sum(),
-    )
+    Some(rucksacks(input).map(find_extra_item).sum())
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    Some(
-        groups(input)
-            .map(find_badge)
-            .map(priority)
-            .map_into::<u32>()
-            .sum(),
-    )
+    Some(groups(input).map(find_badge).sum())
 }
 
 fn main() {

@@ -1,27 +1,17 @@
-fn lists(s: &str) -> Vec<Vec<u32>> {
+fn list_of_sums(s: &str) -> impl Iterator<Item = u32> + '_ {
     s.split("\n\n")
-        .map(|ns| {
-            ns.split('\n')
-                .filter(|n| !n.is_empty())
-                .map(|n| n.trim().parse().unwrap())
-                .collect()
-        })
-        .collect()
+        .map(|ns| ns.lines().filter_map(|n| n.parse::<u32>().ok()))
+        .map(Iterator::sum::<u32>)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let elves = lists(input);
-    elves.into_iter().map(|elf| elf.into_iter().sum()).max()
+    list_of_sums(input).max()
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let elves = lists(input);
-    let mut sums = elves
-        .into_iter()
-        .map(|elf| elf.into_iter().sum::<u32>())
-        .collect::<Vec<_>>();
-    sums.sort_unstable_by(|a, b| b.cmp(a));
-    Some(sums.into_iter().take(3).sum())
+    let mut sums: Vec<u32> = list_of_sums(input).collect();
+    sums.sort_unstable();
+    Some(sums.into_iter().rev().take(3).sum())
 }
 
 fn main() {

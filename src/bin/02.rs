@@ -1,8 +1,8 @@
 #[derive(Clone, Copy, Debug)]
 enum Game {
-    Win,
-    Lose,
-    Tie,
+    Win = 6,
+    Lose = 3,
+    Tie = 0,
 }
 
 impl Game {
@@ -16,11 +16,7 @@ impl Game {
         }
     }
     fn value(self) -> u32 {
-        match self {
-            Game::Win => 6,
-            Game::Tie => 3,
-            Game::Lose => 0,
-        }
+        self as u32
     }
 
     fn needed_throw(self, opponent: Throw) -> Throw {
@@ -33,18 +29,14 @@ impl Game {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Throw {
-    Rock,
-    Paper,
-    Scissors,
+    Rock = 0,
+    Paper = 1,
+    Scissors = 2,
 }
 
 impl Throw {
     fn value(self) -> u32 {
-        match self {
-            Throw::Rock => 1,
-            Throw::Paper => 2,
-            Throw::Scissors => 3,
-        }
+        self as u32 + 1
     }
 
     fn wins_against(self) -> Self {
@@ -92,9 +84,8 @@ fn decrypt_p2((opponent, game): (&str, &str)) -> (Throw, Game) {
 
 fn split_input(input: &str) -> impl Iterator<Item = (&str, &str)> {
     input
-        .split('\n')
-        .filter(|s| !s.is_empty())
-        .map(|s| s.trim().split_once(' ').expect("Only A-C and X-Z"))
+        .lines()
+        .map(|s| s.split_once(' ').expect("Only A-C and X-Z"))
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
