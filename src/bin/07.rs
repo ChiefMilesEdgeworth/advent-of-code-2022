@@ -62,16 +62,6 @@ impl DirectoryTree {
                     .sum::<u32>(),
         )
     }
-
-    fn total_size(&self) -> u32 {
-        let subdirs_sum: u32 = self
-            .subdirs
-            .values()
-            .map(|subtree| subtree.total_size())
-            .sum();
-        let file_sum: u32 = self.files.iter().map(|file| file.size).sum();
-        subdirs_sum + file_sum
-    }
 }
 
 fn part1_small_dir_total(root: &DirectoryTree) -> u32 {
@@ -80,7 +70,7 @@ fn part1_small_dir_total(root: &DirectoryTree) -> u32 {
 }
 
 fn part2_delete_smallest(root: DirectoryTree) -> u32 {
-    let needed_space = 30_000_000 - (70_000_000 - root.total_size());
+    let needed_space = 30_000_000 - (70_000_000 - root.size.unwrap());
     let mut dirs = Vec::from_iter(root.subdirs.values());
     let mut min = 70_000_000;
     while let Some(dir) = dirs.pop() {
