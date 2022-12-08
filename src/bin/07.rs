@@ -45,7 +45,7 @@ impl FromStr for Line {
 struct DirectoryTree {
     subdirs: HashMap<String, DirectoryTree>,
     files: Vec<File>,
-    size: Option<u32>,
+    size: u32,
 }
 
 impl DirectoryTree {
@@ -53,30 +53,23 @@ impl DirectoryTree {
         for dir in self.subdirs.values_mut() {
             dir.populate_sizes()
         }
-        self.size = Some(
-            self.files.iter().map(|file| file.size).sum::<u32>()
-                + self
-                    .subdirs
-                    .values()
-                    .map(|subdir| subdir.size.unwrap())
-                    .sum::<u32>(),
-        )
+        self.size = self.files.iter().map(|file| file.size).sum::<u32>()
+            + self.subdirs.values().map(|subdir| subdir.size).sum::<u32>()
     }
 }
 
 fn part1_small_dir_total(root: &DirectoryTree) -> u32 {
     let subdir_total: u32 = root.subdirs.values().map(part1_small_dir_total).sum();
-    subdir_total + root.size.filter(|s| s <= &100_000).unwrap_or_default()
+    subdir_total + if root.size <= 100_000 { root.size } else { 0 }
 }
 
 fn part2_delete_smallest(root: DirectoryTree) -> u32 {
-    let needed_space = 30_000_000 - (70_000_000 - root.size.unwrap());
+    let needed_space = 30_000_000 - (70_000_000 - root.size);
     let mut dirs = Vec::from_iter(root.subdirs.values());
     let mut min = 70_000_000;
     while let Some(dir) = dirs.pop() {
-        let size = dir.size.unwrap();
-        if size < min && size >= needed_space {
-            min = size;
+        if dir.size < min && dir.size >= needed_space {
+            min = dir.size;
         }
         dirs.extend(dir.subdirs.values());
     }
@@ -97,7 +90,7 @@ fn make_tree(info: impl Iterator<Item = Line>) -> DirectoryTree {
     let mut tree = DirectoryTree {
         subdirs: HashMap::new(),
         files: vec![],
-        size: None,
+        size: 0,
     };
     let mut working_tree = &mut tree;
     for line in info {
