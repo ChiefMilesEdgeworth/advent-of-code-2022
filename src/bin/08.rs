@@ -29,7 +29,7 @@ fn get_visibility(point: usize, direction: Direction, size: usize, bytes: &[u8])
         }
         np = next_point(next, direction, size);
     }
-    return true;
+    true
 }
 
 fn viewing_distance(point: usize, bytes: &[u8], size: usize) -> u32 {
@@ -80,7 +80,7 @@ fn max_viewing_distance(bytes: &[u8]) -> u32 {
 pub fn part_one(input: &str) -> Option<u32> {
     let bytes = input
         .lines()
-        .flat_map(|line| line.as_bytes().into_iter().map(|b| b - b'0'))
+        .flat_map(|line| line.as_bytes().iter().map(|b| b - b'0'))
         .collect_vec();
     Some(visible_from_outside(&bytes))
 }
@@ -88,7 +88,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let bytes = input
         .lines()
-        .flat_map(|line| line.as_bytes().into_iter().map(|b| b - b'0'))
+        .flat_map(|line| line.as_bytes().iter().map(|b| b - b'0'))
         .collect_vec();
     Some(max_viewing_distance(&bytes))
 }
